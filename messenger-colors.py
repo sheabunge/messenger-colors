@@ -26,7 +26,7 @@ def get_args(argv):
 	try:
 		opts, args = gnu_getopt(argv, 'c:u:', ['color=', 'user='])
 	except GetoptError:
-		raise Exception('Invalid arguments: ' + str(sys.argv))
+		raise ValueError('Invalid arguments: ' + str(sys.argv))
 
 	niceargs['thread'] = args[0]
 
@@ -49,6 +49,9 @@ def main(argv):
 	print('user id:', user_id)
 	print('thread id:', thread_id)
 	print('color:', color)
+
+	if not (color and thread_id and user_id):
+		raise ValueError('Invalid arguments')
 
 	headers = {
 		'origin': 'https://www.messenger.com',
