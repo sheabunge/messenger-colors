@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
+import argparse
 import requests
-import sys
 import re
 import random
 import config
-from getopt import GetoptError, gnu_getopt
 
 
 def get_uid(user):
@@ -20,38 +19,38 @@ def get_uid(user):
 	return re.search(r'<code>(\d+)</code>', response.text).group(1)
 
 
-def get_args(argv):
-	niceargs = { 'color': '', 'user': config.user, 'thread': '' }
+def get_args():
+	parser = argparse.ArgumentParser(description='Sets the color of a Facebook Messenger chat thread')
+	parser.add_argument('thread', help='username or ID of the chat thread')
 
-	try:
-		opts, args = gnu_getopt(argv, 'c:u:', ['color=', 'user='])
-	except GetoptError:
-		raise ValueError('Invalid arguments: ' + str(sys.argv))
+	parser.add_argument(
+		'--user', '-u',
+		dest='user',
+		default=config.user,
+		required=False,
+		help='username or ID of the user used to set the color'
+	)
 
-	niceargs['thread'] = args[0]
+	parser.add_argument(
+		'--color', '-c',
+		dest='color',
+		required=True,
+		help='new color of the thread, in hex form'
+	)
 
-	for opt, arg in opts:
-		if opt in ('-c', '--color'):
-			niceargs['color'] = arg
-		elif opt in ('u', '--user'):
-			niceargs['user'] = arg
-
-	return niceargs
+	return parser.parse_args()
 
 
-def main(argv):
-	args = get_args(argv)
+def main():
+	args = get_args()
 
-	user_id = get_uid(args['user'])
-	thread_id = get_uid(args['thread'])
-	color = args['color']
+	user_id = get_uid(args.user)
+	thread_id = get_uid(args.thread)
+	color = args.color
 
 	print('user id:', user_id)
 	print('thread id:', thread_id)
 	print('color:', color)
-
-	if not (color and thread_id and user_id):
-		raise ValueError('Invalid arguments')
 
 	headers = {
 		'origin': 'https://www.messenger.com',
@@ -78,4 +77,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-	main(sys.argv[1:])
+	main()
